@@ -6,14 +6,29 @@ import java.util.ArrayList;
 
 public class IssueDAO {
 
+    // ── Private helper: maps a ResultSet row → Issue ──────
+
+    private Issue mapRow(ResultSet rs) throws SQLException {
+        Issue issue = new Issue();
+        issue.setIssueId(rs.getInt("issue_id"));
+        issue.setTitle(rs.getString("title"));
+        issue.setDescription(rs.getString("description"));
+        issue.setPriority(rs.getString("priority"));
+        issue.setStatus(rs.getString("status"));
+        issue.setCreatedAt(rs.getString("created_at"));
+        return issue;
+    }
+
     // ── Add Issue ─────────────────────────────────────────
+
     public void addIssue(Issue issue) {
         if (issue == null) {
             System.err.println("❌ Cannot add null issue.");
             return;
         }
 
-        String sql = "INSERT INTO issues (title, description, priority, status, created_at) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO issues (title, description, priority, status, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -23,17 +38,17 @@ public class IssueDAO {
             stmt.setString(3, issue.getPriority());
             stmt.setString(4, issue.getStatus());
             stmt.setString(5, issue.getCreatedAt());
-
             stmt.executeUpdate();
+
             System.out.println("✅ Issue added successfully.");
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to add issue.");
-            e.printStackTrace();
+            System.err.println("❌ Failed to add issue: " + e.getMessage());
         }
     }
 
     // ── Get All Issues ────────────────────────────────────
+
     public ArrayList<Issue> getAllIssues() {
         ArrayList<Issue> issues = new ArrayList<>();
         String sql = "SELECT * FROM issues ORDER BY issue_id DESC";
@@ -42,26 +57,17 @@ public class IssueDAO {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                Issue issue = new Issue();
-                issue.setIssueId(rs.getInt("issue_id"));
-                issue.setTitle(rs.getString("title"));
-                issue.setDescription(rs.getString("description"));
-                issue.setPriority(rs.getString("priority"));
-                issue.setStatus(rs.getString("status"));
-                issue.setCreatedAt(rs.getString("created_at"));
-                issues.add(issue);
-            }
+            while (rs.next()) issues.add(mapRow(rs));
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to fetch issues.");
-            e.printStackTrace();
+            System.err.println("❌ Failed to fetch issues: " + e.getMessage());
         }
 
         return issues;
     }
 
     // ── Search Issues by Priority ─────────────────────────
+
     public ArrayList<Issue> getIssuesByPriority(String priority) {
         ArrayList<Issue> issues = new ArrayList<>();
         String sql = "SELECT * FROM issues WHERE priority = ? ORDER BY issue_id DESC";
@@ -70,28 +76,19 @@ public class IssueDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, priority);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Issue issue = new Issue();
-                issue.setIssueId(rs.getInt("issue_id"));
-                issue.setTitle(rs.getString("title"));
-                issue.setDescription(rs.getString("description"));
-                issue.setPriority(rs.getString("priority"));
-                issue.setStatus(rs.getString("status"));
-                issue.setCreatedAt(rs.getString("created_at"));
-                issues.add(issue);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) issues.add(mapRow(rs));
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to search issues by priority.");
-            e.printStackTrace();
+            System.err.println("❌ Failed to search by priority: " + e.getMessage());
         }
 
         return issues;
     }
 
     // ── Update Issue Status ───────────────────────────────
+
     public void updateIssueStatus(int issueId, String status) {
         if (status == null || status.trim().isEmpty()) {
             System.err.println("❌ Status cannot be empty.");
@@ -107,19 +104,17 @@ public class IssueDAO {
             stmt.setInt(2, issueId);
 
             int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                System.out.println("✅ Issue status updated to: " + status);
-            } else {
-                System.out.println("⚠️ Issue not found with ID: " + issueId);
-            }
+            System.out.println(rows > 0
+                ? "✅ Status updated to: " + status
+                : "⚠️ No issue found with ID: " + issueId);
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to update issue status.");
-            e.printStackTrace();
+            System.err.println("❌ Failed to update status: " + e.getMessage());
         }
     }
 
     // ── Delete Issue ──────────────────────────────────────
+
     public void deleteIssue(int issueId) {
         String sql = "DELETE FROM issues WHERE issue_id = ?";
 
@@ -129,21 +124,20 @@ public class IssueDAO {
             stmt.setInt(1, issueId);
 
             int rows = stmt.executeUpdate();
-            if (rows > 0) {
-                System.out.println("✅ Issue deleted successfully.");
-            } else {
-                System.out.println("⚠️ Issue not found with ID: " + issueId);
-            }
+            System.out.println(rows > 0
+                ? "✅ Issue deleted successfully."
+                : "⚠️ No issue found with ID: " + issueId);
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to delete issue.");
-            e.printStackTrace();
+            System.err.println("❌ Failed to delete issue: " + e.getMessage());
         }
     }
 
-    // ── Get Issue Count ───────────────────────────────────
+    // ── Get Total Issue Count ─────────────────────────────
+
     public int getTotalIssueCount() {
         String sql = "SELECT COUNT(*) FROM issues";
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -151,8 +145,9 @@ public class IssueDAO {
             if (rs.next()) return rs.getInt(1);
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("❌ Failed to get issue count: " + e.getMessage());
         }
+
         return 0;
     }
 }
