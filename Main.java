@@ -17,10 +17,11 @@ public class Main {
                 case 1 -> addIssue();
                 case 2 -> viewAllIssues();
                 case 3 -> searchByPriority();
-                case 4 -> updateStatus();
-                case 5 -> deleteIssue();
-                case 6 -> exit();
-                default -> System.out.println("⚠️ Invalid choice. Please enter 1-6.");
+                case 4 -> editIssue();
+                case 5 -> updateStatus();
+                case 6 -> deleteIssue();
+                case 7 -> exit();
+                default -> System.out.println("⚠️ Invalid choice. Please enter 1-7.");
             }
         }
     }
@@ -34,9 +35,10 @@ public class Main {
         System.out.println("1. Add Issue");
         System.out.println("2. View All Issues");
         System.out.println("3. Search Issues by Priority");
-        System.out.println("4. Update Issue Status");
-        System.out.println("5. Delete Issue");
-        System.out.println("6. Exit");
+        System.out.println("4. Edit Issue");
+        System.out.println("5. Update Issue Status");
+        System.out.println("6. Delete Issue");
+        System.out.println("7. Exit");
     }
 
     // ── Case Handlers ─────────────────────────────────────
@@ -84,6 +86,14 @@ public class Main {
         }
         System.out.println("\n--- " + priority + " Priority Issues (" + filtered.size() + ") ---");
         printIssueList(filtered, false);
+    }
+
+    private static void editIssue() {
+        int id = readInt("Enter Issue ID to edit: ");
+        String newTitle = readString("Enter new title: ");
+        String newDescription = readString("Enter new description: ");
+        String newPriority = readString("Enter new priority (Low/Medium/High): ");
+        issueDAO.editIssue(id, newTitle, newDescription, newPriority);
     }
 
     private static void updateStatus() {
