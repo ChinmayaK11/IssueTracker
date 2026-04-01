@@ -9,6 +9,7 @@ public class Issue {
         LOW, MEDIUM, HIGH;
 
         public static boolean isValid(String value) {
+            if (value == null || value.trim().isEmpty()) return false;
             for (Priority p : values()) {
                 if (p.name().equalsIgnoreCase(value)) return true;
             }
@@ -19,7 +20,9 @@ public class Issue {
     public enum Status {
         OPEN, IN_PROGRESS, CLOSED;
 
+        // bug fix: previous version crashed with NullPointerException if value was null
         public static boolean isValid(String value) {
+            if (value == null || value.trim().isEmpty()) return false;
             for (Status s : values()) {
                 if (s.name().equalsIgnoreCase(value.replace(" ", "_"))) return true;
             }
@@ -53,7 +56,7 @@ public class Issue {
         this.createdAt   = LocalDateTime.now().format(FORMATTER);
     }
 
-    // ── Getters & Setters ──────────────────────────────────
+    // ── Getters & Setters ─────────────────────────────────
 
     public int    getIssueId()                    { return issueId; }
     public void   setIssueId(int issueId)         { this.issueId = issueId; }
