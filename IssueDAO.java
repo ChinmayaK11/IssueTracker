@@ -87,6 +87,40 @@ public class IssueDAO {
         return issues;
     }
 
+    // ── Edit Issue (new feature) ──────────────────────────
+    // Updates title, description, and priority for a given issue ID
+
+    public void editIssue(int issueId, String newTitle, String newDescription, String newPriority) {
+        if (newTitle == null || newTitle.trim().isEmpty()) {
+            System.err.println("❌ Title cannot be empty.");
+            return;
+        }
+
+        if (!Issue.Priority.isValid(newPriority)) {
+            System.err.println("❌ Invalid priority. Use Low, Medium, or High.");
+            return;
+        }
+
+        String sql = "UPDATE issues SET title = ?, description = ?, priority = ? WHERE issue_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newTitle.trim());
+            stmt.setString(2, newDescription != null ? newDescription.trim() : "");
+            stmt.setString(3, newPriority.trim());
+            stmt.setInt(4, issueId);
+
+            int rows = stmt.executeUpdate();
+            System.out.println(rows > 0
+                ? "✅ Issue updated successfully."
+                : "⚠️ No issue found with ID: " + issueId);
+
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to edit issue: " + e.getMessage());
+        }
+    }
+
     // ── Update Issue Status ───────────────────────────────
 
     public void updateIssueStatus(int issueId, String status) {
