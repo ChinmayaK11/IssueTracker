@@ -23,15 +23,15 @@ public class IssueDAO {
 
     public void addIssue(Issue issue) {
         if (issue == null) {
-            System.err.println("❌ Cannot add null issue.");
+            System.err.println(" Cannot add null issue.");
             return;
         }
 
         String sql = "INSERT INTO issues (title, description, priority, status, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, issue.getTitle());
             stmt.setString(2, issue.getDescription());
@@ -54,10 +54,11 @@ public class IssueDAO {
         String sql = "SELECT * FROM issues ORDER BY issue_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) issues.add(mapRow(rs));
+            while (rs.next())
+                issues.add(mapRow(rs));
 
         } catch (SQLException e) {
             System.err.println("❌ Failed to fetch issues: " + e.getMessage());
@@ -73,11 +74,12 @@ public class IssueDAO {
         String sql = "SELECT * FROM issues WHERE priority = ? ORDER BY issue_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, priority);
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) issues.add(mapRow(rs));
+                while (rs.next())
+                    issues.add(mapRow(rs));
             }
 
         } catch (SQLException e) {
@@ -94,11 +96,12 @@ public class IssueDAO {
         String sql = "SELECT * FROM issues WHERE status = ? ORDER BY issue_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, status);
             try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) issues.add(mapRow(rs));
+                while (rs.next())
+                    issues.add(mapRow(rs));
             }
 
         } catch (SQLException e) {
@@ -119,15 +122,15 @@ public class IssueDAO {
         String sql = "UPDATE issues SET status = ? WHERE issue_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, status);
             stmt.setInt(2, issueId);
 
             int rows = stmt.executeUpdate();
             System.out.println(rows > 0
-                ? "✅ Status updated to: " + status
-                : "⚠️ No issue found with ID: " + issueId);
+                    ? "✅ Status updated to: " + status
+                    : "⚠️ No issue found with ID: " + issueId);
 
         } catch (SQLException e) {
             System.err.println("❌ Failed to update status: " + e.getMessage());
@@ -140,14 +143,14 @@ public class IssueDAO {
         String sql = "DELETE FROM issues WHERE issue_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, issueId);
 
             int rows = stmt.executeUpdate();
             System.out.println(rows > 0
-                ? "✅ Issue deleted successfully."
-                : "⚠️ No issue found with ID: " + issueId);
+                    ? "✅ Issue deleted successfully."
+                    : "⚠️ No issue found with ID: " + issueId);
 
         } catch (SQLException e) {
             System.err.println("❌ Failed to delete issue: " + e.getMessage());
@@ -160,10 +163,11 @@ public class IssueDAO {
         String sql = "SELECT COUNT(*) FROM issues";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
 
-            if (rs.next()) return rs.getInt(1);
+            if (rs.next())
+                return rs.getInt(1);
 
         } catch (SQLException e) {
             System.err.println("❌ Failed to get issue count: " + e.getMessage());
@@ -177,7 +181,7 @@ public class IssueDAO {
 
     public void printSummaryReport() {
         String prioritySql = "SELECT priority, COUNT(*) as count FROM issues GROUP BY priority";
-        String statusSql   = "SELECT status,   COUNT(*) as count FROM issues GROUP BY status";
+        String statusSql = "SELECT status,   COUNT(*) as count FROM issues GROUP BY status";
 
         System.out.println("\n========== ISSUE SUMMARY REPORT ==========");
 
@@ -185,26 +189,28 @@ public class IssueDAO {
 
             System.out.println("\n📊 By Priority:");
             try (PreparedStatement stmt = conn.prepareStatement(prioritySql);
-                 ResultSet rs = stmt.executeQuery()) {
+                    ResultSet rs = stmt.executeQuery()) {
                 boolean any = false;
                 while (rs.next()) {
                     System.out.printf("   %-10s → %d issue(s)%n",
-                        rs.getString("priority"), rs.getInt("count"));
+                            rs.getString("priority"), rs.getInt("count"));
                     any = true;
                 }
-                if (!any) System.out.println("   No data.");
+                if (!any)
+                    System.out.println("   No data.");
             }
 
             System.out.println("\n📋 By Status:");
             try (PreparedStatement stmt = conn.prepareStatement(statusSql);
-                 ResultSet rs = stmt.executeQuery()) {
+                    ResultSet rs = stmt.executeQuery()) {
                 boolean any = false;
                 while (rs.next()) {
                     System.out.printf("   %-15s → %d issue(s)%n",
-                        rs.getString("status"), rs.getInt("count"));
+                            rs.getString("status"), rs.getInt("count"));
                     any = true;
                 }
-                if (!any) System.out.println("   No data.");
+                if (!any)
+                    System.out.println("   No data.");
             }
 
         } catch (SQLException e) {
@@ -224,17 +230,17 @@ public class IssueDAO {
         }
 
         String sql = "UPDATE issues SET status = 'Closed' " +
-                     "WHERE priority = ? AND status != 'Closed'";
+                "WHERE priority = ? AND status != 'Closed'";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, priority.trim());
 
             int rows = stmt.executeUpdate();
             System.out.println(rows > 0
-                ? "✅ Closed " + rows + " " + priority + "-priority issue(s)."
-                : "⚠️ No open issues found with priority: " + priority);
+                    ? "✅ Closed " + rows + " " + priority + "-priority issue(s)."
+                    : "⚠️ No open issues found with priority: " + priority);
 
         } catch (SQLException e) {
             System.err.println("❌ Failed to close issues: " + e.getMessage());
