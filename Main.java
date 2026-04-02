@@ -21,7 +21,7 @@ public class Main {
                 case 5 -> updateStatus();
                 case 6 -> deleteIssue();
                 case 7 -> exit();
-                default -> System.out.println("⚠️ Invalid choice. Please enter 1-7.");
+                default -> System.out.println(" Invalid choice. Please enter 1-7.");
             }
         }
     }
@@ -126,7 +126,8 @@ public class Main {
             StringBuilder sb = new StringBuilder();
             sb.append("ID: ").append(i.getIssueId());
             sb.append(" | Title: ").append(i.getTitle());
-            if (showPriority) sb.append(" | Priority: ").append(i.getPriority());
+            if (showPriority)
+                sb.append(" | Priority: ").append(i.getPriority());
             sb.append(" | Status: ").append(i.getStatus());
             sb.append(" | Created: ").append(i.getCreatedAt());
             System.out.println(sb);
