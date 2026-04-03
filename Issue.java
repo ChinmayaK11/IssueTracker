@@ -20,7 +20,7 @@ public class Issue {
     }
 
     public enum Status {
-        OPEN, IN_PROGRESS, CLOSED;
+        OPEN, IN_PROGRESS, YESCLOSED;
 
         // bug fix: previous version crashed with NullPointerException if value was null
         public static boolean isValid(String value) {
